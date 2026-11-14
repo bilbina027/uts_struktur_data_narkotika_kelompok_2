@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.pengadilan.app.controller.MainController">
+    <top>
+        <VBox spacing="6" styleClass="header">
+            <Label text="APLIKASI DATA PUTUSAN NARKOTIKA" styleClass="title"/>
+            <Label text="UTS Struktur Data • DynamicArray dan CustomStack" styleClass="subtitle"/>
+        </VBox>
+    </top>
+    <left>
+        <VBox spacing="10" styleClass="sidebar" prefWidth="190">
+            <Button text="Dashboard" onAction="#bukaDashboard" maxWidth="Infinity"/>
+            <Button text="Data Putusan" onAction="#bukaDataPutusan" maxWidth="Infinity"/>
+            <Button text="Filter Lanjutan" onAction="#bukaFilter" maxWidth="Infinity"/>
+            <Button text="Impor / Ekspor" onAction="#bukaImporEkspor" maxWidth="Infinity"/>
+            <Button text="Riwayat Aktivitas" onAction="#bukaRiwayat" maxWidth="Infinity"/>
+        </VBox>
+    </left>
+    <center>
+        <StackPane fx:id="contentArea" styleClass="content"/>
+    </center>
+</BorderPane>
