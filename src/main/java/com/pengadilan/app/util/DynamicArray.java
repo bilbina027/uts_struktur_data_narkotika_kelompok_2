@@ -1,102 +1,137 @@
 package com.pengadilan.app.util;
-public class DynamicArray<T> implements StrukturData<T> {
+
+public final class DynamicArray<T> implements StrukturData<T> {
     private Object[] data;
     private int size;
+
     public DynamicArray() {
-        this.data = new Object[10];
-        this.size = 0;
+        this(10);
     }
+
     public DynamicArray(int capacity) {
-        this.data = new Object[Math.max(capacity, 10)];
-        this.size = 0;
+        if (capacity < 1) {
+            throw new IllegalArgumentException("Kapasitas minimal 1.");
+        }
+        data = new Object[capacity];
     }
+
+    private void requireValue(T value) {
+        if (value == null) {
+            throw new IllegalArgumentException("Elemen tidak boleh null.");
+        }
+    }
+
+    private void checkElement(int index) {
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException(
+                    "Indeks " + index + ", size " + size);
+        }
+    }
+
+    private void grow() {
+        if (size < data.length) return;
+        long capacity = (long) data.length * 2;
+        if (capacity > Integer.MAX_VALUE - 8L) {
+            throw new IllegalStateException("Kapasitas terlalu besar.");
+        }
+        Object[] replacement = new Object[(int) capacity];
+        for (int i = 0; i < size; i++) {
+            replacement[i] = data[i];
+        }
+        data = replacement;
+    }
+
     @Override
     public void add(T value) {
-        ensureCapacity(size + 1);
+        requireValue(value);
+        grow();
         data[size++] = value;
     }
-    public void insert(int position, T value) {
-        if (position < 0 || position > size) {
-            throw new IndexOutOfBoundsException("Index: " + position + ", Size: " + size);
+
+    public void insert(int index, T value) {
+        requireValue(value);
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException("Posisi sisip tidak valid.");
         }
-        ensureCapacity(size + 1);
-        for (int i = size; i > position; i--) {
+        grow();
+        for (int i = size; i > index; i--) {
             data[i] = data[i - 1];
         }
-        data[position] = value;
+        data[index] = value;
         size++;
     }
-    @Override
-    @SuppressWarnings("unchecked")
-    public T get(int position) {
-        if (position < 0 || position >= size) {
-            throw new IndexOutOfBoundsException("Index: " + position + ", Size: " + size);
-        }
-        return (T) data[position];
-    }
-    public void set(int position, T value) {
-        if (position < 0 || position >= size) {
-            throw new IndexOutOfBoundsException("Index: " + position + ", Size: " + size);
-        }
-        data[position] = value;
-    }
-    @Override
-    @SuppressWarnings("unchecked")
-    public T remove(int position) {
-        if (position < 0 || position >= size) {
-            throw new IndexOutOfBoundsException("Index: " + position + ", Size: " + size);
-            T removed = (T) data[position];
-            for (int i = position; i < size - 1; i++) {
-                data[i] = data[i + 1];
-            }
-            data[size - 1] = null;
-            size--;
-            return removed;
-        }
-        @Override
-        public int size() {
-            return size;
-        }
-        @Override
-        public boolean isEmpty() {
-            return size == 0;
-        }
-        @Override
-        public boolean contains(T value) {
-            for (int i = 0; i < size; i++) {
-                if (data[i] == null ? value == null : data[i].
-                        equals(value)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        @Override
-        public void clear() {
-            for (int i = 0; i < size; i++) {
-                data[i] = null;
-            }
-            size = 0
-        }
 
-        @Override
-        public boolean validateInvariant() {
-            if (data == null || size < 0 || size > data.lengt
-            h) {
-                return false;
-            }
-            for (int i = size; i < data.length; i++) {
-                if (data[i] != null) return false;
-            }
-            return true;
-        }
-        private void ensureCapacity(int minCapacity) {
-            if (minCapacity > data.length) {
-                int newCapacity = Math.max(data.length * 2, mi
-                        nCapacity);
-                Object[] newData = new Object[newCapacity];
-                System.arraycopy(data, 0, newData, 0, size);
-                data = newData;
-            }
-        }
+    @Override
+    @SuppressWarnings("unchecked")
+    public T get(int index) {
+        checkElement(index);
+        return (T) data[index];
     }
+
+    public void set(int index, T value) {
+        checkElement(index);
+        requireValue(value);
+        data[index] = value;
+    }
+
+    @Override
+    public T remove(int index) {
+        T removed = get(index);
+        for (int i = index; i < size - 1; i++) {
+            data[i] = data[i + 1];
+        }
+        data[--size] = null;
+        return removed;
+    }
+
+    public int search(T value) {
+        if (value == null) return -1;
+        for (int i = 0; i < size; i++) {
+            if (value.equals(data[i]))
+                return i;
+        }
+        return -1;
+    }
+
+    @Override
+    public boolean contains(T value) {
+        return search(value) >= 0;
+    }
+
+    @Override
+    public int size() {
+        return size;
+    }
+
+    public int capacity() {
+        return data.length;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
+    @Override
+    public void clear() {
+        for (int i = 0; i < size; i++) data[i] = null;
+        size = 0;
+    }
+
+    public DynamicArray<T> copy() {
+        DynamicArray<T> copy = new DynamicArray<>(Math.max(1, size));
+        for (int i = 0; i < size; i++) copy.add(get(i));
+        return copy;
+    }
+
+    public boolean validateInvariant() {
+        if (data == null || size < 0 || size > data.length) return false;
+        for (int i = 0; i < size; i++) {
+            if (data[i] == null) return false;
+        }
+        for (int i = size; i < data.length; i++) {
+            if (data[i] != null) return false;
+        }
+        return true;
+    }
+}

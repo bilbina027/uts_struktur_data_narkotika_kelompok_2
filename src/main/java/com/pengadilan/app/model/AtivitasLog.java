@@ -17,8 +17,7 @@ public class AktivitasLog {
     public String getDeskripsi() { return deskripsi; }
     public LocalDateTime getWaktu() { return waktu; }
     public String getWaktuFormatted() {
-        return waktu.format(DateTimeFormatter.ofPattern("d
-                d MMM yyyy · HH:mm:ss"));
+        return waktu.format(DateTimeFormatter.ofPattern("dd MMM yyyy · HH:mm:ss"));
     }
     public String getUser() { return user; }
     public String getStatus() { return status; }
