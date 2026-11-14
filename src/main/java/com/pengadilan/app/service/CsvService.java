@@ -15,8 +15,7 @@ public final class CsvService {
             int invalidRows,
             DynamicArray<String> errors) {
         public boolean acceptable() {
-            return validRows == 50 && invalidRows == 0 &&
-                    errors.isEmpty();
+            return validRows == 50 && invalidRows == 0 && errors.isEmpty();
         }
 
         public String errorText() {
@@ -34,8 +33,7 @@ public final class CsvService {
         DynamicArray<String> errors = new DynamicArray<>();
         int invalid = 0;
         int count = 0;
-        try (Reader input = Files.newBufferedReader(
-                file.toPath(), StandardCharsets.UTF_8)) {
+        try (Reader input = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             CsvReader reader = new CsvReader(input);
             String[] header = reader.readRecord();
             String[] expected = Putusan.headers();
@@ -58,8 +56,7 @@ public final class CsvService {
                     fields = reader.readRecord();
                 } catch (IOException exception) {
                     invalid++;
-                    errors.add("Sintaks CSV setelah record " + count
-                            + ": " + exception.getMessage());
+                    errors.add("Sintaks CSV setelah record " + count + ": " + exception.getMessage());
                     break;
                 }
                 if (fields == null) break;
@@ -70,8 +67,7 @@ public final class CsvService {
                     staging.add(p);
                 } catch (RuntimeException exception) {
                     invalid++;
-                    errors.add("Record " + count + ": " +
-                            exception.getMessage());
+                    errors.add("Record " + count + ": " + exception.getMessage());
                 }
             }
         }
@@ -79,16 +75,13 @@ public final class CsvService {
             errors.add("Harus 50 record; ditemukan " + count + ".");
         }
         if (staging.size() != 50) {
-            errors.add("Record valid: " + staging.size() +
-                    ", seharusnya 50.");
+            errors.add("Record valid: " + staging.size() + ", seharusnya 50.");
         }
         return new ImportResult(staging, staging.size(), invalid, errors);
     }
 
-    public void exportCsv(File file, DynamicArray<Putusan> records)
-            throws IOException {
-        try (BufferedWriter writer = Files.newBufferedWriter(
-                file.toPath(), StandardCharsets.UTF_8)) {
+    public void exportCsv(File file, DynamicArray<Putusan> records) throws IOException {
+        try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
             writeRecord(writer, Putusan.headers());
             for (int i = 0; i < records.size(); i++) {
                 writeRecord(writer, records.get(i).toFields());
@@ -96,8 +89,7 @@ public final class CsvService {
         }
     }
 
-    private void writeRecord(Writer writer, String[] fields)
-            throws IOException {
+    private void writeRecord(Writer writer, String[] fields) throws IOException {
         for (int i = 0; i < fields.length; i++) {
             if (i > 0) writer.write(',');
             writer.write(escapeCsv(fields[i]));
@@ -113,29 +105,23 @@ public final class CsvService {
         return quoted ? "\"" + escaped + "\"" : escaped;
     }
 
-    public void exportReport(File file, DynamicArray<Putusan> records)
-            throws IOException {
+    public void exportReport(File file, DynamicArray<Putusan> records) throws IOException {
         DataManager.Ringkasan summary = DataManager.summarize(records);
-        try (BufferedWriter writer = Files.newBufferedWriter(
-                file.toPath(), StandardCharsets.UTF_8)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
             writer.write("LAPORAN PUTUSAN NARKOTIKA\n");
             writer.write("Waktu: " + LocalDateTime.now() + "\n");
             writer.write("Jumlah: " + summary.jumlah() + "\n");
-            writer.write(String.format(Locale.ROOT,
-                    "Rata-rata vonis: %.2f bulan%n", summary.rataVonis()));
+            writer.write(String.format(Locale.ROOT, "Rata-rata vonis: %.2f bulan%n", summary.rataVonis()));
             writer.write("Total denda: Rp " + summary.totalDenda() + "\n\n");
             for (int i = 0; i < records.size(); i++) {
                 Putusan p = records.get(i);
-                writer.write(p.getCaseId() + " | " + p.getNomorPerkara()
-                        + " | " + p.getPengadilan() + "\n");
+                writer.write(p.getCaseId() + " " + p.getNomorPerkara() + " | " + p.getPengadilan() + "\n");
             }
         }
     }
 
-    public void exportTrace(File file, DynamicArray<String> trace)
-            throws IOException {
-        try (BufferedWriter writer = Files.newBufferedWriter(
-                file.toPath(), StandardCharsets.UTF_8)) {
+    public void exportTrace(File file, DynamicArray<String> trace) throws IOException {
+        try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
             writer.write("TRACE INSERTION SORT\n");
             for (int i = 0; i < trace.size(); i++) {
                 writer.write(trace.get(i));
@@ -183,8 +169,11 @@ public final class CsvService {
                         } else {
                             quoted = false;
                             closed = true;
-                            if (next != -1) reader.unread(next);
+                            if (next != -1) {
+                                reader.unread(next);
+                            }
                         }
+                        continue;
                     } else {
                         value.append(c);
                         continue;
@@ -219,9 +208,7 @@ public final class CsvService {
             }
         }
 
-        private String[] finish(
-                String[] fields, int count, StringBuilder value)
-                throws IOException {
+        private String[] finish(String[] fields, int count, StringBuilder value) throws IOException {
             if (count >= 16) throw new IOException("Kolom melebihi 16.");
             fields[count++] = value.toString();
             String[] result = new String[count];

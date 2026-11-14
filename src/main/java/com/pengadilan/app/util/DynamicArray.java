@@ -4,9 +4,7 @@ public final class DynamicArray<T> implements StrukturData<T> {
     private Object[] data;
     private int size;
 
-    public DynamicArray() {
-        this(10);
-    }
+    public DynamicArray() { this(10); }
 
     public DynamicArray(int capacity) {
         if (capacity < 1) {
@@ -23,9 +21,20 @@ public final class DynamicArray<T> implements StrukturData<T> {
 
     private void checkElement(int index) {
         if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException(
-                    "Indeks " + index + ", size " + size);
+            throw new IndexOutOfBoundsException("Indeks " + index + ", size " + size);
         }
+    }
+
+    public void resize(int newCapacity) {
+        if (newCapacity < 1 || newCapacity < size) {
+            throw new IllegalArgumentException("Kapasitas baru tidak boleh lebih kecil dari size atau minimal 1.");
+        }
+        if (newCapacity == data.length) return;
+        Object[] replacement = new Object[newCapacity];
+        for (int i = 0; i < size; i++) {
+            replacement[i] = data[i];
+        }
+        data = replacement;
     }
 
     private void grow() {
@@ -34,11 +43,7 @@ public final class DynamicArray<T> implements StrukturData<T> {
         if (capacity > Integer.MAX_VALUE - 8L) {
             throw new IllegalStateException("Kapasitas terlalu besar.");
         }
-        Object[] replacement = new Object[(int) capacity];
-        for (int i = 0; i < size; i++) {
-            replacement[i] = data[i];
-        }
-        data = replacement;
+        resize((int) capacity);
     }
 
     @Override
@@ -87,30 +92,21 @@ public final class DynamicArray<T> implements StrukturData<T> {
     public int search(T value) {
         if (value == null) return -1;
         for (int i = 0; i < size; i++) {
-            if (value.equals(data[i]))
-                return i;
+            if (value.equals(data[i])) return i;
         }
         return -1;
     }
 
     @Override
-    public boolean contains(T value) {
-        return search(value) >= 0;
-    }
+    public boolean contains(T value) { return search(value) >= 0; }
 
     @Override
-    public int size() {
-        return size;
-    }
+    public int size() { return size; }
 
-    public int capacity() {
-        return data.length;
-    }
+    public int capacity() { return data.length; }
 
     @Override
-    public boolean isEmpty() {
-        return size == 0;
-    }
+    public boolean isEmpty() { return size == 0; }
 
     @Override
     public void clear() {

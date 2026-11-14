@@ -9,28 +9,17 @@ public final class AktivitasLog {
     private final String user;
     private final String status;
 
-    public AktivitasLog(String deskripsi, boolean berhasil) {
+    public AktivitasLog (String deskripsi, boolean berhasil) {
         this.deskripsi = deskripsi;
         this.waktu = LocalDateTime.now();
         this.user = "Pengguna Lokal";
         this.status = berhasil ? "BERHASIL" : "GAGAL";
     }
 
-    public String getDeskripsi() {
-        return deskripsi;
-    }
-
-    public LocalDateTime getWaktu() {
-        return waktu;
-    }
-
-    public String getUser() {
-        return user;
-    }
-
-    public String getStatus() {
-        return status;
-    }
+    public String getDeskripsi() { return deskripsi; }
+    public LocalDateTime getWaktu () { return waktu; }
+    public String getUser() { return user; }
+    public String getStatus() { return status; }
 
     @Override
     public String toString() {

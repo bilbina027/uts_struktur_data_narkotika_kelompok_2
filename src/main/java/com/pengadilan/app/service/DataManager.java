@@ -9,7 +9,6 @@ import java.util.Locale;
 
 public final class DataManager {
     private static final DataManager INSTANCE = new DataManager();
-
     private DynamicArray<Putusan> data = new DynamicArray<>();
     private final CustomStack<AktivitasLog> logs = new CustomStack<>();
     private DynamicArray<String> trace = new DynamicArray<>();
@@ -26,9 +25,7 @@ public final class DataManager {
         logs.push(new AktivitasLog(description, success));
     }
 
-    public void tambahLog(String description) {
-        tambahLog(description, true);
-    }
+    public void tambahLog(String description) { tambahLog(description, true); }
 
     public DynamicArray<AktivitasLog> getRiwayat() {
         DynamicArray<AktivitasLog> result = new DynamicArray<>();
@@ -74,7 +71,7 @@ public final class DataManager {
                 String newCourt = normalisasiPengadilan(record.getPengadilan());
                 if (!existingCourt.equals(newCourt)) {
                     throw new IllegalArgumentException(
-                            "Putusan harus berasal dari Pengadilan Negeri " + data.get(0).getPengadilan()
+                        "Putusan harus berasal dari Pengadilan Negeri " + data.get(0).getPengadilan()
                     );
                 }
             }
@@ -119,7 +116,7 @@ public final class DataManager {
             steps++;
             Putusan record = data.get(i);
             if (record.getCaseId().toLowerCase(Locale.ROOT).contains(query)
-                    || record.getNomorPerkara().toLowerCase(Locale.ROOT).contains(query)) {
+                || record.getNomorPerkara().toLowerCase(Locale.ROOT).contains(query)) {
                 tambahLog("Cari ditemukan: " + keyword + "; indeks=" + i + "; langkah=" + steps, true);
                 return new SearchResult(i, steps, record);
             }
@@ -131,33 +128,31 @@ public final class DataManager {
     public record FilterCriteria(
             String jenis, Double beratMin, Double beratMax,
             String pasal, Integer vonisMin, Integer vonisMax) {
-
         public FilterCriteria {
             jenis = jenis == null ? "" : jenis.trim();
             pasal = pasal == null ? "" : pasal.trim();
-
             if ((beratMin != null && (!Double.isFinite(beratMin) || beratMin < 0))
-                    || (beratMax != null && (!Double.isFinite(beratMax) || beratMax < 0))) {
+                || (beratMax != null && (!Double.isFinite(beratMax) || beratMax < 0))) {
                 throw new IllegalArgumentException("Rentang berat tidak valid.");
             }
             if (beratMin != null && beratMax != null && beratMin > beratMax) {
                 throw new IllegalArgumentException("Berat min melebihi max.");
             }
             if ((vonisMin != null && vonisMin < 0)
-                    || (vonisMax != null && vonisMax < 0)
-                    || (vonisMin != null && vonisMax != null && vonisMin > vonisMax)) {
+                || (vonisMax != null && vonisMax < 0)
+                || (vonisMin != null && vonisMax != null && vonisMin > vonisMax)) {
                 throw new IllegalArgumentException("Rentang vonis tidak valid.");
             }
         }
 
         public boolean matches(Putusan p) {
             return (jenis.isBlank() || p.getJenisNarkotika().equalsIgnoreCase(jenis))
-                    && (beratMin == null || p.getBeratBarangBuktiGram() >= beratMin)
-                    && (beratMax == null || p.getBeratBarangBuktiGram() <= beratMax)
-                    && (pasal.isBlank() || (p.getPasalTerbukti() != null
-                    && p.getPasalTerbukti().toLowerCase(Locale.ROOT).contains(pasal.toLowerCase(Locale.ROOT))))
-                    && (vonisMin == null || p.getVonisBulan() >= vonisMin)
-                    && (vonisMax == null || p.getVonisBulan() <= vonisMax);
+                && (beratMin == null || p.getBeratBarangBuktiGram() >= beratMin)
+                && (beratMax == null || p.getBeratBarangBuktiGram() <= beratMax)
+                && (pasal.isBlank() || (p.getPasalTerbukti() != null
+                && p.getPasalTerbukti().toLowerCase(Locale.ROOT).contains(pasal.toLowerCase(Locale.ROOT))))
+                && (vonisMin == null || p.getVonisBulan() >= vonisMin)
+                && (vonisMax == null || p.getVonisBulan() <= vonisMax);
         }
     }
 
@@ -181,15 +176,14 @@ public final class DataManager {
             }
             String targetPengadilan = normalisasiPengadilan(staging.get(0).getPengadilan());
             DynamicArray<Putusan> replacement = new DynamicArray<>(50);
-
             for (int i = 0; i < staging.size(); i++) {
                 Putusan putusan = staging.get(i);
                 ensureUnique(replacement, putusan);
                 String currentPengadilan = normalisasiPengadilan(putusan.getPengadilan());
                 if (!targetPengadilan.equals(currentPengadilan)) {
                     throw new IllegalArgumentException(
-                            "Record " + putusan.getCaseId() + " berasal dari " + putusan.getPengadilan()
-                                    + ", sedangkan seluruh dataset harus berasal dari " + staging.get(0).getPengadilan()
+                        "Record " + putusan.getCaseId() + " berasal dari " + putusan.getPengadilan()
+                        + ", sedangkan seluruh dataset harus berasal dari " + staging.get(0).getPengadilan()
                     );
                 }
                 replacement.add(putusan);
@@ -207,7 +201,6 @@ public final class DataManager {
         trace.add("Awal: " + orderText());
         long comparisons = 0;
         long shifts = 0;
-
         for (int i = 1; i < data.size(); i++) {
             Putusan key = data.get(i);
             int j = i - 1;
@@ -250,9 +243,9 @@ public final class DataManager {
             totalDenda = totalDenda.add(BigInteger.valueOf(p.getDendaRupiah()));
         }
         return new Ringkasan(
-                records.size(),
-                records.isEmpty() ? 0 : (double) totalVonis / records.size(),
-                totalDenda
+            records.size(),
+            records.isEmpty() ? 0 : (double) totalVonis / records.size(),
+            totalDenda
         );
     }
 
