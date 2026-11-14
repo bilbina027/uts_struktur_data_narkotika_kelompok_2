@@ -8,7 +8,6 @@ import com.pengadilan.app.util.DynamicArray;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigInteger;
@@ -16,14 +15,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class MainAppTest {
-
     @TempDir
     Path directory;
-
     private final DataManager manager = DataManager.getInstance();
 
     private Putusan fixture(int index) {
@@ -96,45 +92,23 @@ class MainAppTest {
         assertEquals("A", array.get(0));
         assertEquals("B", array.get(1));
         assertTrue(array.validateInvariant());
-        // Resize ke bawah di bawah ukuran size harus ditolak
         assertThrows(IllegalArgumentException.class, () -> array.resize(1));
     }
 
     @Test
     void dynamicArrayRejectsInvalidOperations() {
         DynamicArray<String> array = new DynamicArray<>();
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new DynamicArray<String>(0)
-        );
-        assertThrows(
-                IndexOutOfBoundsException.class,
-                () -> array.get(0)
-        );
-        assertThrows(
-                IndexOutOfBoundsException.class,
-                () -> array.remove(-1)
-        );
-        assertThrows(
-                IndexOutOfBoundsException.class,
-                () -> array.insert(1, "A")
-        );
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> array.add(null)
-        );
+        assertThrows(IllegalArgumentException.class, () -> new DynamicArray<String>(0));
+        assertThrows(IndexOutOfBoundsException.class, () -> array.get(0));
+        assertThrows(IndexOutOfBoundsException.class, () -> array.remove(-1));
+        assertThrows(IndexOutOfBoundsException.class, () -> array.insert(1, "A"));
+        assertThrows(IllegalArgumentException.class, () -> array.add(null));
         array.insert(0, "A");
         array.insert(array.size(), "B");
         assertEquals("A", array.get(0));
         assertEquals("B", array.get(1));
-        assertThrows(
-                IndexOutOfBoundsException.class,
-                () -> array.set(2, "C")
-        );
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> array.set(0, null)
-        );
+        assertThrows(IndexOutOfBoundsException.class, () -> array.set(2, "C"));
+        assertThrows(IllegalArgumentException.class, () -> array.set(0, null));
         assertTrue(array.validateInvariant());
     }
 
@@ -169,54 +143,32 @@ class MainAppTest {
     @Test
     void stackRejectsInvalidOperations() {
         CustomStack<String> stack = new CustomStack<>();
-        assertThrows(
-                IllegalStateException.class,
-                stack::pop
-        );
-        assertThrows(
-                IllegalStateException.class,
-                stack::peek
-        );
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> stack.push(null)
-        );
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> stack.restore(stack)
-        );
-        assertThrows(
-                IndexOutOfBoundsException.class,
-                () -> stack.getFromTop(0)
-        );
+        assertThrows(IllegalStateException.class, stack::pop);
+        assertThrows(IllegalStateException.class, stack::peek);
+        assertThrows(IllegalArgumentException.class, () -> stack.push(null));
+        assertThrows(IllegalArgumentException.class, () -> stack.restore(stack));
+        assertThrows(IndexOutOfBoundsException.class, () -> stack.getFromTop(0));
         assertTrue(stack.validateInvariant());
     }
 
     @Test
     void searchReportsCorrectIndicesAndSteps() {
-        DataManager.SearchResult first =
-                manager.cariPerkara("TEST-0");
+        DataManager.SearchResult first = manager.cariPerkara("TEST-0");
         assertTrue(first.found());
         assertEquals(0, first.index());
         assertEquals(1, first.steps());
-        DataManager.SearchResult last =
-                manager.cariPerkara("TEST-49");
+        DataManager.SearchResult last = manager.cariPerkara("TEST-49");
         assertTrue(last.found());
         assertEquals(49, last.index());
         assertEquals(50, last.steps());
-        DataManager.SearchResult missing =
-                manager.cariPerkara("TIDAK-ADA");
+        DataManager.SearchResult missing = manager.cariPerkara("TIDAK-ADA");
         assertFalse(missing.found());
         assertEquals(-1, missing.index());
         assertEquals(50, missing.steps());
         assertNull(missing.putusan());
-        DataManager.SearchResult number =
-                manager.cariPerkara("49/Pid.Sus/2024/PN TEST");
+        DataManager.SearchResult number = manager.cariPerkara("49/Pid.Sus/2024/PN TEST");
         assertEquals(49, number.index());
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> manager.cariPerkara("")
-        );
+        assertThrows(IllegalArgumentException.class, () -> manager.cariPerkara(""));
     }
 
     @Test
@@ -227,10 +179,7 @@ class MainAppTest {
         assertEquals(47, manager.size());
         DynamicArray<Putusan> remaining = manager.getDataPutusan();
         assertEquals("TEST-1", remaining.get(0).getCaseId());
-        assertEquals(
-                "TEST-48",
-                remaining.get(remaining.size() - 1).getCaseId()
-        );
+        assertEquals("TEST-48", remaining.get(remaining.size() - 1).getCaseId());
         manager.tambahPutusan(fixture(0));
         manager.tambahPutusan(fixture(25));
         manager.tambahPutusan(fixture(49));
@@ -244,17 +193,11 @@ class MainAppTest {
 
     @Test
     void duplicateIdAndNumberAreRejected() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> manager.tambahPutusan(fixture(0))
-        );
+        assertThrows(IllegalArgumentException.class, () -> manager.tambahPutusan(fixture(0)));
         String[] fields = fixture(100).toFields();
         fields[1] = fixture(0).getNomorPerkara();
         Putusan duplicateNumber = Putusan.fromFields(fields);
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> manager.tambahPutusan(duplicateNumber)
-        );
+        assertThrows(IllegalArgumentException.class, () -> manager.tambahPutusan(duplicateNumber));
         assertEquals(50, manager.size());
         assertTrue(manager.validateInvariant());
     }
@@ -264,10 +207,7 @@ class MainAppTest {
         String[] fields = fixture(100).toFields();
         fields[2] = "PN Uji B";
         Putusan differentCourt = Putusan.fromFields(fields);
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> manager.tambahPutusan(differentCourt)
-        );
+        assertThrows(IllegalArgumentException.class, () -> manager.tambahPutusan(differentCourt));
         assertEquals(50, manager.size());
         assertEquals("PN Uji A", manager.getDataPutusan().get(0).getPengadilan());
         assertTrue(manager.validateInvariant());
@@ -279,35 +219,20 @@ class MainAppTest {
         snapshot.remove(0);
         snapshot.clear();
         assertEquals(50, manager.size());
-        assertEquals(
-                "TEST-0",
-                manager.getDataPutusan().get(0).getCaseId()
-        );
+        assertEquals("TEST-0", manager.getDataPutusan().get(0).getCaseId());
     }
 
     @Test
     void failedReplacementPreservesExistingData() {
         DynamicArray<Putusan> invalid = new DynamicArray<>();
         invalid.add(fixture(100));
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> manager.replaceAll(invalid)
-        );
+        assertThrows(IllegalArgumentException.class, () -> manager.replaceAll(invalid));
         assertEquals(50, manager.size());
-        assertEquals(
-                "TEST-0",
-                manager.getDataPutusan().get(0).getCaseId()
-        );
+        assertEquals("TEST-0", manager.getDataPutusan().get(0).getCaseId());
         DynamicArray<Putusan> duplicates = dataset();
         duplicates.set(49, fixture(0));
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> manager.replaceAll(duplicates)
-        );
-        assertEquals(
-                "TEST-49",
-                manager.getDataPutusan().get(49).getCaseId()
-        );
+        assertThrows(IllegalArgumentException.class, () -> manager.replaceAll(duplicates));
+        assertEquals("TEST-49", manager.getDataPutusan().get(49).getCaseId());
         assertTrue(manager.validateInvariant());
     }
 
@@ -317,10 +242,7 @@ class MainAppTest {
         manager.replaceAll(records);
         assertEquals(50, manager.size());
         for (int i = 0; i < manager.size(); i++) {
-            assertEquals(
-                    "PN Uji A",
-                    manager.getDataPutusan().get(i).getPengadilan()
-            );
+            assertEquals("PN Uji A", manager.getDataPutusan().get(i).getPengadilan());
         }
         assertTrue(manager.validateInvariant());
     }
@@ -331,11 +253,7 @@ class MainAppTest {
         String[] fields = records.get(49).toFields();
         fields[2] = "PN Uji B";
         records.set(49, Putusan.fromFields(fields));
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> manager.replaceAll(records)
-        );
-
+        assertThrows(IllegalArgumentException.class, () -> manager.replaceAll(records));
         assertEquals("TEST-0", manager.getDataPutusan().get(0).getCaseId());
         assertEquals("TEST-49", manager.getDataPutusan().get(49).getCaseId());
         assertEquals(50, manager.size());
@@ -344,15 +262,9 @@ class MainAppTest {
 
     @Test
     void combinedFilterUsesInclusiveBoundaries() {
-        DataManager.FilterCriteria criteria =
-                new DataManager.FilterCriteria(
-                        "Sabu",
-                        10.25,
-                        20.25,
-                        "112",
-                        10,
-                        20
-                );
+        DataManager.FilterCriteria criteria = new DataManager.FilterCriteria(
+                "Sabu", 10.25, 20.25, "112", 10, 20
+        );
         DynamicArray<Putusan> result = manager.filter(criteria);
         assertEquals(6, result.size());
         assertEquals("TEST-10", result.get(0).getCaseId());
@@ -366,54 +278,26 @@ class MainAppTest {
     @Test
     void filterHandlesNullPasalSafely() {
         DynamicArray<Putusan> result = manager.filter(
-                new DataManager.FilterCriteria(
-                        "Ganja",
-                        null,
-                        null,
-                        "112",
-                        null,
-                        null
-                )
+                new DataManager.FilterCriteria("Ganja", null, null, "112", null, null)
         );
         assertTrue(result.isEmpty());
     }
 
     @Test
     void invalidFilterRangesAreRejected() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new DataManager.FilterCriteria(
-                        "", 10.0, 5.0, null, null, null)
-        );
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new DataManager.FilterCriteria(
-                        "", Double.NaN, null, "", null, null)
-        );
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new DataManager.FilterCriteria(
-                        "", null, null, "", 20, 10)
-        );
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new DataManager.FilterCriteria(
-                        "", null, null, "", -1, null)
-        );
+        assertThrows(IllegalArgumentException.class, () -> new DataManager.FilterCriteria("", 10.0, 5.0, null, null, null));
+        assertThrows(IllegalArgumentException.class, () -> new DataManager.FilterCriteria("", Double.NaN, null, "", null, null));
+        assertThrows(IllegalArgumentException.class, () -> new DataManager.FilterCriteria("", null, null, "", 20, 10));
+        assertThrows(IllegalArgumentException.class, () -> new DataManager.FilterCriteria("", null, null, "", -1, null));
     }
 
     @Test
     void summaryAndDistributionAreCorrect() {
-        DataManager.Ringkasan summary =
-                manager.hitungRingkasan();
+        DataManager.Ringkasan summary = manager.hitungRingkasan();
         assertEquals(50, summary.jumlah());
         assertEquals(24.5, summary.rataVonis(), 0.000001);
-        assertEquals(
-                BigInteger.valueOf(1_225_000L),
-                summary.totalDenda()
-        );
-        DynamicArray<DataManager.DistribusiJenis> distribution =
-                manager.distribusiJenis();
+        assertEquals(BigInteger.valueOf(1_225_000L), summary.totalDenda());
+        DynamicArray<DataManager.DistribusiJenis> distribution = manager.distribusiJenis();
         assertEquals(2, distribution.size());
         assertEquals("Sabu", distribution.get(0).jenis());
         assertEquals(25, distribution.get(0).jumlah());
@@ -459,34 +343,19 @@ class MainAppTest {
     void modelRejectsInvalidNumbersAndDate() {
         String[] nanFields = fixture(0).toFields();
         nanFields[6] = "NaN";
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> Putusan.fromFields(nanFields)
-        );
+        assertThrows(IllegalArgumentException.class, () -> Putusan.fromFields(nanFields));
         String[] infiniteFields = fixture(0).toFields();
         infiniteFields[6] = "Infinity";
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> Putusan.fromFields(infiniteFields)
-        );
+        assertThrows(IllegalArgumentException.class, () -> Putusan.fromFields(infiniteFields));
         String[] invalidDate = fixture(0).toFields();
         invalidDate[3] = "2024-02-30";
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> Putusan.fromFields(invalidDate)
-        );
+        assertThrows(IllegalArgumentException.class, () -> Putusan.fromFields(invalidDate));
         String[] negativeFine = fixture(0).toFields();
         negativeFine[11] = "-1";
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> Putusan.fromFields(negativeFine)
-        );
+        assertThrows(IllegalArgumentException.class, () -> Putusan.fromFields(negativeFine));
         String[] invalidInteger = fixture(0).toFields();
         invalidInteger[10] = "2.5";
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> Putusan.fromFields(invalidInteger)
-        );
+        assertThrows(IllegalArgumentException.class, () -> Putusan.fromFields(invalidInteger));
     }
 
     @Test
@@ -518,8 +387,7 @@ class MainAppTest {
         Path file = directory.resolve("roundtrip.csv");
         CsvService service = new CsvService();
         service.exportCsv(file.toFile(), source);
-        CsvService.ImportResult imported =
-                service.importCsv(file.toFile());
+        CsvService.ImportResult imported = service.importCsv(file.toFile());
         assertTrue(imported.acceptable(), imported.errorText());
         assertEquals(50, imported.validRows());
         assertEquals(0, imported.invalidRows());
@@ -538,8 +406,7 @@ class MainAppTest {
         Path file = directory.resolve("wrong-count.csv");
         CsvService service = new CsvService();
         service.exportCsv(file.toFile(), records);
-        CsvService.ImportResult result =
-                service.importCsv(file.toFile());
+        CsvService.ImportResult result = service.importCsv(file.toFile());
         assertFalse(result.acceptable());
         assertEquals(49, result.validRows());
         assertEquals(50, manager.size());
@@ -552,8 +419,7 @@ class MainAppTest {
         Path file = directory.resolve("duplicate.csv");
         CsvService service = new CsvService();
         service.exportCsv(file.toFile(), records);
-        CsvService.ImportResult result =
-                service.importCsv(file.toFile());
+        CsvService.ImportResult result = service.importCsv(file.toFile());
         assertFalse(result.acceptable());
         assertEquals(49, result.validRows());
         assertEquals(1, result.invalidRows());
@@ -563,40 +429,27 @@ class MainAppTest {
     @Test
     void csvRejectsWrongHeader() throws IOException {
         Path file = directory.resolve("wrong-header.csv");
-        Files.writeString(
-                file,
-                "header, salah\n",
-                StandardCharsets.UTF_8
-        );
-        CsvService.ImportResult result =
-                new CsvService().importCsv(file.toFile());
+        Files.writeString(file, "header, salah\n", StandardCharsets.UTF_8);
+        CsvService.ImportResult result = new CsvService().importCsv(file.toFile());
         assertFalse(result.acceptable());
         assertEquals(0, result.validRows());
     }
 
     @Test
     void csvParserRejectsBrokenQuotes() {
-        CsvService.CsvReader reader = new CsvService.CsvReader(
-                new StringReader("\"quote belum ditutup")
-        );
+        CsvService.CsvReader reader = new CsvService.CsvReader(new StringReader("\"quote belum ditutup"));
         assertThrows(IOException.class, reader::readRecord);
     }
 
     @Test
     void csvParserRejectsCharactersAfterClosingQuote() {
-        CsvService.CsvReader reader = new CsvService.CsvReader(
-                new StringReader("\"A\"x,B")
-        );
+        CsvService.CsvReader reader = new CsvService.CsvReader(new StringReader("\"A\"x,B"));
         assertThrows(IOException.class, reader::readRecord);
     }
 
     @Test
     void csvParserRejectsExtraColumns() {
-        CsvService.CsvReader reader = new CsvService.CsvReader(
-                new StringReader(
-                        "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17"
-                )
-        );
+        CsvService.CsvReader reader = new CsvService.CsvReader(new StringReader("1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17"));
         assertThrows(IOException.class, reader::readRecord);
     }
 
@@ -605,29 +458,27 @@ class MainAppTest {
         Path file = directory.resolve("bom.csv");
         CsvService service = new CsvService();
         service.exportCsv(file.toFile(), dataset());
-        String content = Files.readString(
-                file,
-                StandardCharsets.UTF_8
-        );
-        Files.writeString(
-                file,
-                "\uFEFF" + content,
-                StandardCharsets.UTF_8
-        );
-        CsvService.ImportResult result =
-                service.importCsv(file.toFile());
+        String content = Files.readString(file, StandardCharsets.UTF_8);
+        Files.writeString(file, "\uFEFF" + content, StandardCharsets.UTF_8);
+        CsvService.ImportResult result = service.importCsv(file.toFile());
         assertTrue(result.acceptable(), result.errorText());
+    }
+
+    private static void assertResourceExists(String path) {
+        assertNotNull(
+                MainAppTest.class.getResource(path),
+                "Resource tidak ditemukan di classpath: " + path
+        );
     }
 
     @Test
     void fxmlAndCssResourcesExist() {
-        String base = "/com/pengadilan/app/";
-        assertNotNull(getClass().getResource(base + "fxml/MainView.fxml"));
-        assertNotNull(getClass().getResource(base + "fxml/DashboardView.fxml"));
-        assertNotNull(getClass().getResource(base + "fxml/DataPutusanView.fxml"));
-        assertNotNull(getClass().getResource(base + "fxml/FilterView.fxml"));
-        assertNotNull(getClass().getResource(base + "fxml/ImporEksporView.fxml"));
-        assertNotNull(getClass().getResource(base + "fxml/RiwayatView.fxml"));
-        assertNotNull(getClass().getResource(base + "css/style.css"));
+        assertResourceExists("/com/pengadilan/app/fxml/MainView.fxml");
+        assertResourceExists("/com/pengadilan/app/fxml/DashboardView.fxml");
+        assertResourceExists("/com/pengadilan/app/fxml/DataPutusanView.fxml");
+        assertResourceExists("/com/pengadilan/app/fxml/FilterView.fxml");
+        assertResourceExists("/com/pengadilan/app/fxml/ImporEksporView.fxml");
+        assertResourceExists("/com/pengadilan/app/fxml/RiwayatView.fxml");
+        assertResourceExists("/com/pengadilan/app/css/style.css");
     }
 }
