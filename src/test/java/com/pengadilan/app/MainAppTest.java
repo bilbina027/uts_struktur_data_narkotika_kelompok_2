@@ -431,4 +431,200 @@ class MainAppTest {
 
     @Test
     void insertionSortIsStableForEqualValues() {
-        DynamicArray<Put
+        DynamicArray<Putusan> records = dataset();
+        for (int index = 0; index < records.size(); index++) {
+            String[] fields = records.get(index).toFields();
+            fields[10] = Integer.toString(index % 2);
+            records.set(index, Putusan.fromFields(fields));
+        }
+        manager.replaceAll(records);
+        manager.urutkanBerdasarkanVonis();
+
+        DynamicArray<Putusan> sorted = manager.getDataPutusan();
+        assertEquals("TEST-0", sorted.get(0).getCaseId());
+        assertEquals("TEST-2", sorted.get(1).getCaseId());
+        assertEquals("TEST-1", sorted.get(25).getCaseId());
+        assertEquals("TEST-3", sorted.get(26).getCaseId());
+        assertTrue(manager.validateInvariant());
+    }
+
+    @Test
+    void modelRejectsInvalidNumbersAndDate() {
+        String[] nanFields = fixture(0).toFields();
+        nanFields[6] = "NaN";
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> Putusan.fromFields(nanFields)
+        );
+
+        String[] infiniteFields = fixture(0).toFields();
+        infiniteFields[6] = "Infinity";
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> Putusan.fromFields(infiniteFields)
+        );
+
+        String[] invalidDate = fixture(0).toFields();
+        invalidDate[3] = "2024-02-30";
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> Putusan.fromFields(invalidDate)
+        );
+
+        String[] negativeFine = fixture(0).toFields();
+        negativeFine[11] = "-1";
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> Putusan.fromFields(negativeFine)
+        );
+
+        String[] invalidInteger = fixture(0).toFields();
+        invalidInteger[10] = "2.5";
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> Putusan.fromFields(invalidInteger)
+        );
+    }
+
+    @Test
+    void missingOptionalFieldsBecomeNullOrZero() {
+        String[] fields = fixture(0).toFields();
+        fields[6] = "";
+        fields[8] = "";
+        fields[9] = "";
+        fields[10] = "";
+        fields[11] = "";
+        fields[12] = "";
+
+        Putusan record = Putusan.fromFields(fields);
+        assertEquals(0.0, record.getBeratBarangBuktiGram(), 0.000001);
+        assertNull(record.getPasalTerbukti());
+        assertEquals(0, record.getTuntutanBulan());
+        assertEquals(0, record.getVonisBulan());
+        assertEquals(0L, record.getDendaRupiah());
+        assertNull(record.getBarangBukti());
+    }
+
+    @Test
+    void csvRoundTripPreservesSixteenFields() throws IOException {
+        DynamicArray<Putusan> source = dataset();
+        String[] fields = source.get(0).toFields();
+        fields[12] = "Barang bukti, dengan \"kutipan\"\nbaris kedua";
+        fields[13] = "Teks, berkoma";
+        fields[14] = "\"Kutipan\" tambahan";
+        source.set(0, Putusan.fromFields(fields));
+
+        Path file = directory.resolve("roundtrip.csv");
+        CsvService service = new CsvService();
+        service.exportCsv(file.toFile(), source);
+        CsvService.ImportResult imported = service.importCsv(file.toFile());
+
+        assertTrue(imported.acceptable(), imported.errorText());
+        assertEquals(50, imported.validRows());
+        assertEquals(0, imported.invalidRows());
+        for (int index = 0; index < 50; index++) {
+            assertArrayEquals(
+                    source.get(index).toFields(),
+                    imported.records().get(index).toFields()
+            );
+        }
+    }
+
+    @Test
+    void csvRejectsWrongRecordCount() throws IOException {
+        DynamicArray<Putusan> records = dataset();
+        records.remove(49);
+        Path file = directory.resolve("wrong-count.csv");
+        CsvService service = new CsvService();
+        service.exportCsv(file.toFile(), records);
+        CsvService.ImportResult result = service.importCsv(file.toFile());
+
+        assertFalse(result.acceptable());
+        assertEquals(49, result.validRows());
+        assertEquals(50, manager.size());
+    }
+
+    @Test
+    void csvRejectsDuplicateRecord() throws IOException {
+        DynamicArray<Putusan> records = dataset();
+        records.set(49, fixture(0));
+        Path file = directory.resolve("duplicate.csv");
+        CsvService service = new CsvService();
+        service.exportCsv(file.toFile(), records);
+        CsvService.ImportResult result = service.importCsv(file.toFile());
+
+        assertFalse(result.acceptable());
+        assertEquals(49, result.validRows());
+        assertEquals(1, result.invalidRows());
+        assertEquals(50, manager.size());
+    }
+
+    @Test
+    void csvRejectsWrongHeader() throws IOException {
+        Path file = directory.resolve("wrong-header.csv");
+        Files.writeString(
+                file,
+                "header,salah\n",
+                StandardCharsets.UTF_8
+        );
+        CsvService.ImportResult result = new CsvService().importCsv(file.toFile());
+
+        assertFalse(result.acceptable());
+        assertEquals(0, result.validRows());
+    }
+
+    @Test
+    void csvParserRejectsBrokenQuotes() {
+        CsvService.CsvReader reader = new CsvService.CsvReader(
+                new StringReader("\"quote belum ditutup")
+        );
+        assertThrows(IOException.class, reader::readRecord);
+    }
+
+    @Test
+    void csvParserRejectsCharactersAfterClosingQuote() {
+        CsvService.CsvReader reader = new CsvService.CsvReader(
+                new StringReader("\"A\"x,B")
+        );
+        assertThrows(IOException.class, reader::readRecord);
+    }
+
+    @Test
+    void csvParserRejectsExtraColumns() {
+        CsvService.CsvReader reader = new CsvService.CsvReader(
+                new StringReader("1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17")
+        );
+        assertThrows(IOException.class, reader::readRecord);
+    }
+
+    @Test
+    void csvSupportsUtf8Bom() throws IOException {
+        Path file = directory.resolve("bom.csv");
+        CsvService service = new CsvService();
+        service.exportCsv(file.toFile(), dataset());
+        String content = Files.readString(
+                file,
+                StandardCharsets.UTF_8
+        );
+        Files.writeString(
+                file,
+                "\uFEFF" + content,
+                StandardCharsets.UTF_8
+        );
+
+        CsvService.ImportResult result = service.importCsv(file.toFile());
+        assertTrue(result.acceptable(), result.errorText());
+    }
+
+    @Test
+    void fxmlAndCssResourcesExist() {
+        String base = "/com/pengadilan/app/";
+        assertNotNull(getClass().getResource(base + "fxml/MainView.fxml"));
+        assertNotNull(getClass().getResource(base + "fxml/DashboardView.fxml"));
+        assertNotNull(getClass().getResource(base + "fxml/DataPutusanView.fxml"));
+        assertNotNull(getClass().getResource(base + "fxml/FilterView.fxml"));
+        assertNotNull(getClass().getResource(base + "fxml/ImporEksporView.fxml"));
+        assertNotNull(getClass().getResource(base + "fxml/RiwayatView.fxml"));
+        assertNotNull(getClass().getResource(base + "css/style.css"));
+    }
+}
