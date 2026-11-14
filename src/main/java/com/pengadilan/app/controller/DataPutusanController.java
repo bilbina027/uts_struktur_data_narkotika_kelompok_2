@@ -35,8 +35,12 @@ public class DataPutusanController {
 
     @FXML
     public void handleRefresh() {
-        display(manager.getDataPutusan());
-        lblStatus.setText("Jumlah data: " + displayed.size());
+        txtCari.clear();
+        DynamicArray<Putusan> semua = manager.getDataPutusan();
+        display(semua);
+        tablePutusan.getSelectionModel().clearSelection();
+        tablePutusan.scrollTo(0);
+        lblStatus.setText("Menampilkan seluruh data: " + displayed.size() + " putusan.");
     }
 
     @FXML
@@ -49,7 +53,8 @@ public class DataPutusanController {
             lblStatus.setText(
                     (result.found() ? "Ditemukan" : "Tidak ditemukan")
                             + " | indeks utama=" + result.index()
-                            + " | langkah=" + result.steps());
+                            + " | langkah=" + result.steps()
+            );
         } catch (Exception exception) {
             MainController.error(exception);
         }
@@ -57,9 +62,41 @@ public class DataPutusanController {
 
     @FXML
     public void handleUrutkan() {
-        manager.urutkanBerdasarkanVonis();
-        handleRefresh();
-        lblStatus.setText("Insertion Sort stabil selesai.");
+        try {
+            DynamicArray<Putusan> sebelum = manager.getDataPutusan();
+            if (sebelum.isEmpty()) {
+                display(sebelum);
+                lblStatus.setText("Belum ada data putusan untuk diurutkan.");
+                return;
+            }
+            manager.urutkanBerdasarkanVonis();
+            DynamicArray<Putusan> sesudah = manager.getDataPutusan();
+            txtCari.clear();
+            display(sesudah);
+            tablePutusan.refresh();
+            tablePutusan.getSelectionModel().clearSelection();
+            tablePutusan.scrollTo(0);
+
+            boolean berubah = false;
+            for (int i = 0; i < sesudah.size(); i++) {
+                if (!sebelum.get(i).getCaseId().equals(sesudah.get(i).getCaseId())) {
+                    berubah = true;
+                    break;
+                }
+            }
+
+            int vonisTerendah = sesudah.get(0).getVonisBulan();
+            int vonisTertinggi = sesudah.get(sesudah.size() - 1).getVonisBulan();
+            String hasil = berubah ? "Urutan berhasil diubah." : "Data memang sudah terurut.";
+            lblStatus.setText(
+                    hasil + " Urutan vonis: terkecil ke terbesar. Jumlah: " + sesudah.size()
+                            + " | Rentang: " + vonisTerendah + "-" + vonisTertinggi + " bulan. Trace tersedia melalui Ekspor Trace."
+            );
+        } catch (RuntimeException exception) {
+            manager.tambahLog("Pengurutan gagal: " + exception.getMessage(), false);
+            lblStatus.setText("Pengurutan gagal: " + exception.getMessage());
+            MainController.error(exception);
+        }
     }
 
     @FXML
@@ -128,22 +165,16 @@ public class DataPutusanController {
 
         saveButton.addEventFilter(ActionEvent.ACTION, event -> {
             event.consume();
-            Putusan record;
             try {
                 String[] values = new String[16];
                 for (int i = 0; i < 16; i++) values[i] = fields[i].getText();
                 values[5] = jenis.getEditor().getText();
-                record = Putusan.fromFields(values);
-            } catch (Exception exception) {
-                manager.tambahLog("Form tambah ditolak: " + exception.getMessage(), false);
-                error.setText(exception.getMessage());
-                return;
-            }
-            try {
+                Putusan record = Putusan.fromFields(values);
                 manager.tambahPutusan(record);
                 dialog.close();
                 handleRefresh();
             } catch (Exception exception) {
+                manager.tambahLog("Form tambah ditolak: " + exception.getMessage(), false);
                 error.setText(exception.getMessage());
             }
         });

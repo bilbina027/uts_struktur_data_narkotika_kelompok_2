@@ -15,8 +15,8 @@ public class ImporEksporController {
     @FXML
     public void initialize() {
         lblStatusImpor.setText(
-                "Data utama: " + manager.size()
-                        + " record. Impor membutuhkan tepat 50 putusan dari satu Pengadilan Negeri yang sama."
+                "Data utama: " + manager.size() + " record. "
+                        + "Impor membutuhkan tepat 50 putusan dari satu Pengadilan Negeri yang sama."
         );
     }
 
@@ -24,14 +24,9 @@ public class ImporEksporController {
     public void handleImporCSV() {
         File file = MainController.chooseFile(
                 lblStatusImpor.getScene().getWindow(),
-                false,
-                "Impor 50 Putusan CSV",
-                "csv"
+                false, "Impor 50 Putusan CSV", "csv"
         );
-        if (file == null) {
-            return;
-        }
-
+        if (file == null) return;
         try {
             CsvService.ImportResult result = csvService.importCsv(file);
             if (!result.acceptable()) {
@@ -47,10 +42,7 @@ public class ImporEksporController {
             );
         } catch (Exception exception) {
             manager.tambahLog("Impor gagal: " + exception.getMessage(), false);
-            lblStatusImpor.setText(
-                    "Impor ditolak: " + exception.getMessage()
-                            + "\nData lama tetap dipertahankan."
-            );
+            lblStatusImpor.setText("Impor ditolak: " + exception.getMessage() + "\nData lama tetap dipertahankan.");
         }
     }
 
@@ -71,9 +63,7 @@ public class ImporEksporController {
                 laporan ? "Ekspor Laporan Putusan" : "Ekspor Seluruh Data Putusan",
                 laporan ? "txt" : "csv"
         );
-        if (file == null) {
-            return;
-        }
+        if (file == null) return;
         try {
             if (laporan) {
                 csvService.exportReport(file, manager.getDataPutusan());
