@@ -1,71 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
 
-<ScrollPane fitToWidth="true" fitToHeight="true" prefHeight="720.0" prefWidth="804.0"
-            style="-fx-background: #f4f7f6; -fx-border-color: #f4f7f6;"
-            stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/21"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.pengadilan.app.controller.DashboardController">
-    <content>
-        <VBox spacing="20.0" style="-fx-padding: 25; -fx-background-color: #f4f7f6;">
-            <!-- Header Sambutan -->
-            <HBox alignment="CENTER_LEFT">
-                <VBox spacing="2.0">
-                    <Label text="Selamat Datang, Administrator" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0f172a;" />
-                    <Label text="Ringkasan analisis data putusan pengadilan narkotika PN Surabaya." style="-fx-font-size: 13px; -fx-text-fill: #64748b;" />
-                </VBox>
-                <Pane HBox.hgrow="ALWAYS" />
-                <Label fx:id="lblTanggalHariIni" text="Rabu, 04 Nov 2026" style="-fx-font-weight: bold; -fx-text-fill: #475569;" />
-            </HBox>
-
-            <!-- 4 Kartu Statistik Atas -->
-            <HBox spacing="15.0">
-                <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" prefWidth="180.0">
-                    <Label text="TOTAL PUTUSAN" styleClass="stat-title"/>
-                    <Label fx:id="lblTotalPutusan" text="50" styleClass="stat-value"/>
-                    <Label text="50 data terindeks" style="-fx-text-fill: #16a34a; -fx-font-size: 11px;"/>
-                </VBox>
-                <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" prefWidth="180.0">
-                    <Label text="RATA-RATA VONIS" styleClass="stat-title"/>
-                    <Label fx:id="lblRataVonis" text="62,9 Bulan" styleClass="stat-value"/>
-                    <Label text="Durasi rata-rata" style="-fx-text-fill: #2563eb; -fx-font-size: 11px;"/>
-                </VBox>
-                <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" prefWidth="180.0">
-                    <Label text="TOTAL DENDA" styleClass="stat-title"/>
-                    <Label fx:id="lblTotalDenda" text="Rp 42.300.000.000" styleClass="stat-value"/>
-                    <Label text="Akumulasi vonis" style="-fx-text-fill: #d97706; -fx-font-size: 11px;"/>
-                </VBox>
-                <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" prefWidth="180.0">
-                    <Label text="STATUS SISTEM" styleClass="stat-title"/>
-                    <Label text="Aktif" styleClass="stat-value" style="-fx-text-fill: #16a34a; "/>
-                    <Label text="In-Memory MVC" style="-fx-text-fill: #64748b; -fx-font-size: 11px;"/>
-                </VBox>
-            </HBox>
-
-            <!-- Aksi Cepat dengan onAction yang terhubung ke Controller -->
-            <VBox spacing="10.0" styleClass="stat-card">
-                <Label text="AKSI CEPAT" style="-fx-font-weight: bold; -fx-text-fill: #475569; -fx-font-size: 13px;"/>
-                <HBox spacing="15.0">
-                    <Button text="Kelola Data Putusan" onAction="#handleKelolaData" maxWidth="Infinity" HBox.hgrow="ALWAYS" style="-fx-padding: 12; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                    <Button text="Buka Filter Lanjutan" onAction="#handleBukaFilter" maxWidth="Infinity" HBox.hgrow="ALWAYS" style="-fx-background-color: #475569; -fx-padding: 12; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                    <Button text="Impor Berkas CSV" onAction="#handleImporBerkas" maxWidth="Infinity" HBox.hgrow="ALWAYS" style="-fx-background-color: #059669; -fx-padding: 12; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                </HBox>
-            </VBox>
-
-            <!-- Grid Dua Kolom Grafik yang Responsif dan Meregang Proporsional -->
-            <HBox spacing="20.0" VBox.vgrow="ALWAYS">
-                <PieChart fx:id="chartNarkotika" title="Distribusi Jenis Narkotika" HBox.hgrow="ALWAYS" prefHeight="350.0" styleClass="stat-card" />
-                <BarChart fx:id="chartVonis" title="Statistik Rata-rata Vonis (Bulan)" HBox.hgrow="ALWAYS" prefHeight="350.0" styleClass="stat-card">
-                    <xAxis>
-                        <CategoryAxis side="BOTTOM" />
-                    </xAxis>
-                    <yAxis>
-                        <NumberAxis side="LEFT" />
-                    </yAxis>
-                </BarChart>
-            </HBox>
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pengadilan.app.controller.DashboardController"
+      spacing="16" styleClass="page">
+    <Label text="Dashboard" styleClass="page-title"/>
+    <HBox spacing="16">
+        <VBox spacing="8" styleClass="stat-card" HBox.hgrow="ALWAYS">
+            <Label text="JUMLAH PERKARA"/>
+            <Label fx:id="lblTotalPerkara" styleClass="stat-value"/>
         </VBox>
-    </content>
-</ScrollPane>
+        <VBox spacing="8" styleClass="stat-card" HBox.hgrow="ALWAYS">
+            <Label text="RATA-RATA VONIS"/>
+            <Label fx:id="lblRataVonis" styleClass="stat-value"/>
+        </VBox>
+        <VBox spacing="8" styleClass="stat-card" HBox.hgrow="ALWAYS">
+            <Label text="TOTAL DENDA"/>
+            <Label fx:id="lblTotalDenda" styleClass="stat-value"/>
+        </VBox>
+    </HBox>
+    <HBox spacing="10">
+        <Button text="Kelola Data" onAction="#handleKelolaData"/>
+        <Button text="Filter Lanjutan" onAction="#handleBukaFilter"/>
+        <Button text="Impor CSV" onAction="#handleImporBerkas"/>
+    </HBox>
+    <HBox spacing="12" VBox.vgrow="ALWAYS">
+        <PieChart fx:id="chartNarkotika"
+                  title="Distribusi label jenis narkotika"
+                  HBox.hgrow="ALWAYS" minWidth="0"/>
+        <BarChart fx:id="chartVonis" title="Rata-rata vonis"
+                  HBox.hgrow="ALWAYS" minWidth="0">
+            <xAxis><CategoryAxis/></xAxis>
+            <yAxis><NumberAxis label="Bulan" forceZeroInRange="true"/></yAxis>
+        </BarChart>
+    </HBox>
+</VBox>

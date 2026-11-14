@@ -40,7 +40,7 @@ public final class DynamicArray<T> implements StrukturData<T> {
     private void grow() {
         if (size < data.length) return;
         long capacity = (long) data.length * 2;
-        if (capacity > Integer.MAX_VALUE) {
+        if (capacity > Integer.MAX_VALUE - 8L) {
             throw new IllegalStateException("Kapasitas terlalu besar.");
         }
         resize((int) capacity);
@@ -92,9 +92,7 @@ public final class DynamicArray<T> implements StrukturData<T> {
     public int search(T value) {
         if (value == null) return -1;
         for (int i = 0; i < size; i++) {
-            if (value.equals(data[i])) {
-                return i;
-            }
+            if (value.equals(data[i])) return i;
         }
         return -1;
     }

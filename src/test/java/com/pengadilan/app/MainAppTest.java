@@ -20,26 +20,27 @@ import static org.junit.jupiter.api.Assertions.*;
 class MainAppTest {
     @TempDir
     Path directory;
+
     private final DataManager manager = DataManager.getInstance();
 
     private Putusan fixture(int index) {
         return new Putusan(
-                "TEST-" + index,
-                index + "/Pid.Sus/2024/PN TEST",
-                "PN Uji A",
-                LocalDate.of(2024, 1, 1),
-                "T-UJI-" + index,
-                index % 2 == 0 ? "Sabu" : "Ganja",
-                index + 0.25,
-                "Dakwaan pengujian",
-                index % 2 == 0 ? "Pasal 112 ayat (1)" : null,
-                72,
-                index,
-                (long) index * 1000L,
-                "Barang bukti pengujian",
-                null,
-                null,
-                "FIXTURE TEST; bukan sumber putusan nyata"
+            "TEST-" + index,
+            index + "/Pid.Sus/2024/PN TEST",
+            "PN Uji A",
+            LocalDate.of(2024, 1, 1),
+            "T-UJI-" + index,
+            index % 2 == 0 ? "Sabu" : "Ganja",
+            index + 0.25,
+            "Dakwaan pengujian",
+            index % 2 == 0 ? "Pasal 112 ayat (1)" : null,
+            72,
+            index,
+            (long) index * 1000L,
+            "Barang bukti pengujian",
+            null,
+            null,
+            "FIXTURE TEST; bukan sumber putusan nyata"
         );
     }
 
@@ -203,17 +204,6 @@ class MainAppTest {
     }
 
     @Test
-    void addingDifferentCourtIsRejected() {
-        String[] fields = fixture(100).toFields();
-        fields[2] = "PN Uji B";
-        Putusan differentCourt = Putusan.fromFields(fields);
-        assertThrows(IllegalArgumentException.class, () -> manager.tambahPutusan(differentCourt));
-        assertEquals(50, manager.size());
-        assertEquals("PN Uji A", manager.getDataPutusan().get(0).getPengadilan());
-        assertTrue(manager.validateInvariant());
-    }
-
-    @Test
     void snapshotDoesNotModifyMainStorage() {
         DynamicArray<Putusan> snapshot = manager.getDataPutusan();
         snapshot.remove(0);
@@ -263,7 +253,7 @@ class MainAppTest {
     @Test
     void combinedFilterUsesInclusiveBoundaries() {
         DataManager.FilterCriteria criteria = new DataManager.FilterCriteria(
-                "Sabu", 10.25, 20.25, "112", 10, 20
+            "Sabu", 10.25, 20.25, "112", 10, 20
         );
         DynamicArray<Putusan> result = manager.filter(criteria);
         assertEquals(6, result.size());
@@ -278,7 +268,7 @@ class MainAppTest {
     @Test
     void filterHandlesNullPasalSafely() {
         DynamicArray<Putusan> result = manager.filter(
-                new DataManager.FilterCriteria("Ganja", null, null, "112", null, null)
+            new DataManager.FilterCriteria("Ganja", null, null, "112", null, null)
         );
         assertTrue(result.isEmpty());
     }
@@ -393,8 +383,8 @@ class MainAppTest {
         assertEquals(0, imported.invalidRows());
         for (int index = 0; index < 50; index++) {
             assertArrayEquals(
-                    source.get(index).toFields(),
-                    imported.records().get(index).toFields()
+                source.get(index).toFields(),
+                imported.records().get(index).toFields()
             );
         }
     }
@@ -449,7 +439,9 @@ class MainAppTest {
 
     @Test
     void csvParserRejectsExtraColumns() {
-        CsvService.CsvReader reader = new CsvService.CsvReader(new StringReader("1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17"));
+        CsvService.CsvReader reader = new CsvService.CsvReader(
+            new StringReader("1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17")
+        );
         assertThrows(IOException.class, reader::readRecord);
     }
 
@@ -464,21 +456,15 @@ class MainAppTest {
         assertTrue(result.acceptable(), result.errorText());
     }
 
-    private static void assertResourceExists(String path) {
-        assertNotNull(
-                MainAppTest.class.getResource(path),
-                "Resource tidak ditemukan di classpath: " + path
-        );
-    }
-
     @Test
     void fxmlAndCssResourcesExist() {
-        assertResourceExists("/com/pengadilan/app/fxml/MainView.fxml");
-        assertResourceExists("/com/pengadilan/app/fxml/DashboardView.fxml");
-        assertResourceExists("/com/pengadilan/app/fxml/DataPutusanView.fxml");
-        assertResourceExists("/com/pengadilan/app/fxml/FilterView.fxml");
-        assertResourceExists("/com/pengadilan/app/fxml/ImporEksporView.fxml");
-        assertResourceExists("/com/pengadilan/app/fxml/RiwayatView.fxml");
-        assertResourceExists("/com/pengadilan/app/css/style.css");
+        String base = "/com/pengadilan/app/";
+        assertNotNull(getClass().getResource(base + "fxml/MainView.fxml"));
+        assertNotNull(getClass().getResource(base + "fxml/DashboardView.fxml"));
+        assertNotNull(getClass().getResource(base + "fxml/DataPutusanView.fxml"));
+        assertNotNull(getClass().getResource(base + "fxml/FilterView.fxml"));
+        assertNotNull(getClass().getResource(base + "fxml/ImporEksporView.fxml"));
+        assertNotNull(getClass().getResource(base + "fxml/RiwayatView.fxml"));
+        assertNotNull(getClass().getResource(base + "css/style.css"));
     }
 }

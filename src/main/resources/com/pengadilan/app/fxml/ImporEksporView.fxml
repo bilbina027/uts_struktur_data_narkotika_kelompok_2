@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pengadilan.app.controller.ImporEksporController"
+      spacing="16" styleClass="page">
+    <Label text="Impor dan Ekspor" styleClass="page-title"/>
+    <Label text="Setiap proses impor wajib memuat tepat 50 putusan. Seluruh putusan dalam satu dataset harus berasal dari satu Pengadilan Negeri yang sama. Pastikan setiap data telah dicocokkan dengan dokumen PDF putusan sebagai sumber utama."
+           wrapText="true"/>
+    <Label text="Data putusan diimpor menggunakan format CSV yang memuat 16 atribut. Seluruh atribut dapat divalidasi, dicari, difilter, diurutkan, dan diekspor melalui aplikasi."
+           wrapText="true"/>
+    <Label text="Apabila ditemukan record tidak valid, duplikat, pengadilan tidak seragam, atau jumlah putusan tidak tepat 50, proses impor akan ditolak dan data sebelumnya tetap dipertahankan."
+           wrapText="true"/>
+    <HBox spacing="10">
+        <Button text="Impor CSV" onAction="#handleImporCSV"/>
+        <Button text="Ekspor Semua CSV" onAction="#handleEksporCSV"/>
+        <Button text="Ekspor Laporan Teks" onAction="#handleEksporLaporan"/>
+    </HBox>
+    <Label fx:id="lblStatusImpor" wrapText="true" styleClass="status"/>
+</VBox>
