@@ -2,29 +2,24 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox prefHeight="720.0" prefWidth="804.0" spacing="20.0"
-      style="-fx-padding: 25;" stylesheets="@../css/style.css"
-      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.pengadilan.app.controller.ImporEksporController">
-    <Label text="Impor dan Ekspor Data Berkas" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0f172a;" />
-
-    <HBox spacing="20.0">
-        <VBox styleClass="stat-card" prefWidth="370.0" spacing="10.0">
-            <Label text="Impor Data" style="-fx-font-weight: bold; -fx-font-size: 15px;"/>
-            <Label text="Unggah data putusan melalui berkas CSV." style="-fx-text-fill: #64748b; -fx-font-size: 12px;"/>
-            <Pane prefHeight="40.0" />
-            <Button text="Pilih Berkas CSV" onAction="#handleImporCSV" maxWidth="Infinity"/>
-        </VBox>
-        <VBox styleClass="stat-card" prefWidth="370.0" spacing="10.0">
-            <Label text="Ekspor Data" style="-fx-font-weight: bold; -fx-font-size: 15px;"/>
-            <Label text="Unduh seluruh data putusan yang tersimpan." style="-fx-text-fill: #64748b; -fx-font-size: 12px;"/>
-            <Pane prefHeight="40.0" />
-            <Button text="Ekspor ke CSV" onAction="#handleEksporCSV" maxWidth="Infinity" style="-fx-background-color: #16a34a;"/>
-        </VBox>
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pengadilan.app.controller.ImporEksporController"
+      spacing="16" styleClass="page">
+    <Label text="Impor dan Ekspor" styleClass="page-title"/>
+    <Label text="Impor awal wajib memuat tepat 50 putusan nyata. Semua putusan harus berasal dari satu kota yang sama sesuai ketentuan dosen."
+           wrapText="true"/>
+    <Label text="PDF putusan digunakan sebagai sumber. Aplikasi mengimpor dataset terstruktur CSV agar 16 atribut dapat divalidasi, dicari, difilter, diurutkan, dan diekspor."
+           wrapText="true"/>
+    <HBox spacing="10">
+        <Label text="Kota sumber:"/>
+        <TextField fx:id="txtKota" promptText="Contoh: Malang" prefWidth="250"/>
     </HBox>
-
-    <VBox spacing="10.0" styleClass="stat-card">
-        <Label text="Riwayat Impor &amp; Ekspor" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-        <Label fx:id="lblStatusImpor" text="Belum ada berkas yang diimpor pada sesi ini." style="-fx-text-fill: #64748b;"/>
-    </VBox>
+    <Label text="Jika ada record rusak, duplikat, kota tidak sesuai, atau jumlah bukan 50, data lama tidak diganti."
+           wrapText="true"/>
+    <HBox spacing="10">
+        <Button text="Impor CSV" onAction="#handleImporCSV"/>
+        <Button text="Ekspor Semua CSV" onAction="#handleEksporCSV"/>
+        <Button text="Ekspor Laporan Teks" onAction="#handleEksporLaporan"/>
+    </HBox>
+    <Label fx:id="lblStatusImpor" wrapText="true" styleClass="status"/>
 </VBox>
