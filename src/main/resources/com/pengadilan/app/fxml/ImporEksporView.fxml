@@ -6,15 +6,11 @@
       fx:controller="com.pengadilan.app.controller.ImporEksporController"
       spacing="16" styleClass="page">
     <Label text="Impor dan Ekspor" styleClass="page-title"/>
-    <Label text="Impor awal wajib memuat tepat 50 putusan nyata. Semua putusan harus berasal dari satu kota yang sama sesuai ketentuan dosen."
+    <Label text="Setiap proses impor wajib memuat tepat 50 putusan. Seluruh putusan dalam satu dataset harus berasal dari satu Pengadilan Negeri yang sama. Pastikan setiap data telah dicocokkan dengan dokumen PDF putusan sebagai sumber utama."
            wrapText="true"/>
-    <Label text="PDF putusan digunakan sebagai sumber. Aplikasi mengimpor dataset terstruktur CSV agar 16 atribut dapat divalidasi, dicari, difilter, diurutkan, dan diekspor."
+    <Label text="Data putusan diimpor menggunakan format CSV yang memuat 16 atribut. Seluruh atribut dapat divalidasi, dicari, difilter, diurutkan, dan diekspor melalui aplikasi."
            wrapText="true"/>
-    <HBox spacing="10">
-        <Label text="Kota sumber:"/>
-        <TextField fx:id="txtKota" promptText="Contoh: Malang" prefWidth="250"/>
-    </HBox>
-    <Label text="Jika ada record rusak, duplikat, kota tidak sesuai, atau jumlah bukan 50, data lama tidak diganti."
+    <Label text="Apabila ditemukan record tidak valid, duplikat, pengadilan tidak seragam, atau jumlah putusan tidak tepat 50, proses impor akan ditolak dan data sebelumnya tetap dipertahankan."
            wrapText="true"/>
     <HBox spacing="10">
         <Button text="Impor CSV" onAction="#handleImporCSV"/>

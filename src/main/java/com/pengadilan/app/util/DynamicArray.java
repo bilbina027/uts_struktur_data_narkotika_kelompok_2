@@ -23,12 +23,10 @@ public final class DynamicArray<T> implements StrukturData<T> {
 
     private void checkElement(int index) {
         if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException(
-                    "Indeks " + index + ", size " + size);
+            throw new IndexOutOfBoundsException("Indeks " + index + ", size " + size);
         }
     }
 
-    // Method resize publik eksplisit sesuai rekomendasi Revisi 7
     public void resize(int newCapacity) {
         if (newCapacity < 1 || newCapacity < size) {
             throw new IllegalArgumentException("Kapasitas baru tidak boleh lebih kecil dari size atau minimal 1.");
@@ -98,7 +96,8 @@ public final class DynamicArray<T> implements StrukturData<T> {
     public int search(T value) {
         if (value == null) return -1;
         for (int i = 0; i < size; i++) {
-            if (value.equals(data[i])) return i;
+            if (value.equals(data[i]))
+                return i;
         }
         return -1;
     }
