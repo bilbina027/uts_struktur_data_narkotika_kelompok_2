@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefHeight="720.0" prefWidth="804.0" spacing="20.0"
+      style="-fx-padding: 25;" stylesheets="@../css/style.css"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pengadilan.app.controller.ImporEksporController">
+    <Label text="Impor dan Ekspor Data Berkas" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+
+    <HBox spacing="20.0">
+        <VBox styleClass="stat-card" prefWidth="370.0" spacing="10.0">
+            <Label text="Impor Data" style="-fx-font-weight: bold; -fx-font-size: 15px;"/>
+            <Label text="Unggah data putusan melalui berkas CSV." style="-fx-text-fill: #64748b; -fx-font-size: 12px;"/>
+            <Pane prefHeight="40.0" />
+            <Button text="Pilih Berkas CSV" onAction="#handleImporCSV" maxWidth="Infinity"/>
+        </VBox>
+        <VBox styleClass="stat-card" prefWidth="370.0" spacing="10.0">
+            <Label text="Ekspor Data" style="-fx-font-weight: bold; -fx-font-size: 15px;"/>
+            <Label text="Unduh seluruh data putusan yang tersimpan." style="-fx-text-fill: #64748b; -fx-font-size: 12px;"/>
+            <Pane prefHeight="40.0" />
+            <Button text="Ekspor ke CSV" onAction="#handleEksporCSV" maxWidth="Infinity" style="-fx-background-color: #16a34a;"/>
+        </VBox>
+    </HBox>
+
+    <VBox spacing="10.0" styleClass="stat-card">
+        <Label text="Riwayat Impor &amp; Ekspor" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+        <Label fx:id="lblStatusImpor" text="Belum ada berkas yang diimpor pada sesi ini." style="-fx-text-fill: #64748b;"/>
+    </VBox>
+</VBox>
