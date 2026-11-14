@@ -4,9 +4,7 @@ public final class CustomStack<T> {
     private Object[] data;
     private int size;
 
-    public CustomStack() {
-        this(10);
-    }
+    public CustomStack() { this(10); }
 
     public CustomStack(int capacity) {
         if (capacity < 1) {
@@ -21,7 +19,7 @@ public final class CustomStack<T> {
         }
         if (size == data.length) {
             long capacity = (long) data.length * 2;
-            if (capacity > Integer.MAX_VALUE - 8L) {
+            if (capacity > Integer.MAX_VALUE) {
                 throw new IllegalStateException("Kapasitas terlalu besar.");
             }
             Object[] replacement = new Object[(int) capacity];
@@ -61,23 +59,16 @@ public final class CustomStack<T> {
 
     public void restore(CustomStack<T> temporary) {
         if (temporary == null || temporary == this) {
-            throw new IllegalArgumentException(
-                    "Stack sementara harus berbeda dan tidak null.");
+            throw new IllegalArgumentException("Stack sementara harus berbeda dan tidak null.");
         }
         while (!temporary.isEmpty()) push(temporary.pop());
     }
 
-    public int size() {
-        return size;
-    }
+    public int size() { return size; }
 
-    public boolean isEmpty() {
-        return size == 0;
-    }
+    public boolean isEmpty() { return size == 0; }
 
-    public void clear() {
-        while (!isEmpty()) pop();
-    }
+    public void clear() { while (!isEmpty()) pop(); }
 
     public boolean validateInvariant() {
         if (data == null || size < 0 || size > data.length) return false;

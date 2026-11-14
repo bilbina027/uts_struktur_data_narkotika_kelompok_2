@@ -9,7 +9,6 @@ import java.util.Locale;
 
 public final class DataManager {
     private static final DataManager INSTANCE = new DataManager();
-
     private DynamicArray<Putusan> data = new DynamicArray<>();
     private final CustomStack<AktivitasLog> logs = new CustomStack<>();
     private DynamicArray<String> trace = new DynamicArray<>();
@@ -18,25 +17,15 @@ public final class DataManager {
         tambahLog("Aplikasi siap; belum ada dataset.", true);
     }
 
-    public static DataManager getInstance() {
-        return INSTANCE;
-    }
-
-    public DynamicArray<Putusan> getDataPutusan() {
-        return data.copy();
-    }
-
-    public int size() {
-        return data.size();
-    }
+    public static DataManager getInstance() { return INSTANCE; }
+    public DynamicArray<Putusan> getDataPutusan() { return data.copy(); }
+    public int size() { return data.size(); }
 
     public void tambahLog(String description, boolean success) {
         logs.push(new AktivitasLog(description, success));
     }
 
-    public void tambahLog(String description) {
-        tambahLog(description, true);
-    }
+    public void tambahLog(String description) { tambahLog(description, true); }
 
     public DynamicArray<AktivitasLog> getRiwayat() {
         DynamicArray<AktivitasLog> result = new DynamicArray<>();
@@ -47,25 +36,20 @@ public final class DataManager {
     }
 
     public boolean validateInvariant() {
-        return data.validateInvariant()
-                && logs.validateInvariant() && trace.validateInvariant();
+        return data.validateInvariant() && logs.validateInvariant() && trace.validateInvariant();
     }
 
-    static void ensureUnique(
-            DynamicArray<Putusan> existing, Putusan candidate) {
+    static void ensureUnique(DynamicArray<Putusan> existing, Putusan candidate) {
         if (candidate == null) {
             throw new IllegalArgumentException("Record tidak boleh null.");
         }
         for (int i = 0; i < existing.size(); i++) {
             Putusan current = existing.get(i);
             if (current.getCaseId().equalsIgnoreCase(candidate.getCaseId())) {
-                throw new IllegalArgumentException(
-                    "Duplikasi caseId: " + candidate.getCaseId());
+                throw new IllegalArgumentException("Duplikasi caseId: " + candidate.getCaseId());
             }
-            if (current.getNomorPerkara()
-                    .equalsIgnoreCase(candidate.getNomorPerkara())) {
-                throw new IllegalArgumentException(
-                    "Duplikasi nomor perkara: " + candidate.getNomorPerkara());
+            if (current.getNomorPerkara().equalsIgnoreCase(candidate.getNomorPerkara())) {
+                throw new IllegalArgumentException("Duplikasi nomor perkara: " + candidate.getNomorPerkara());
             }
         }
     }
@@ -132,7 +116,7 @@ public final class DataManager {
             steps++;
             Putusan record = data.get(i);
             if (record.getCaseId().toLowerCase(Locale.ROOT).contains(query)
-                    || record.getNomorPerkara().toLowerCase(Locale.ROOT).contains(query)) {
+                || record.getNomorPerkara().toLowerCase(Locale.ROOT).contains(query)) {
                 tambahLog("Cari ditemukan: " + keyword + "; indeks=" + i + "; langkah=" + steps, true);
                 return new SearchResult(i, steps, record);
             }
@@ -148,32 +132,27 @@ public final class DataManager {
             jenis = jenis == null ? "" : jenis.trim();
             pasal = pasal == null ? "" : pasal.trim();
             if ((beratMin != null && (!Double.isFinite(beratMin) || beratMin < 0))
-                    || (beratMax != null && (!Double.isFinite(beratMax) || beratMax < 0))) {
+                || (beratMax != null && (!Double.isFinite(beratMax) || beratMax < 0))) {
                 throw new IllegalArgumentException("Rentang berat tidak valid.");
             }
             if (beratMin != null && beratMax != null && beratMin > beratMax) {
                 throw new IllegalArgumentException("Berat min melebihi max.");
             }
             if ((vonisMin != null && vonisMin < 0)
-                    || (vonisMax != null && vonisMax < 0)
-                    || (vonisMin != null && vonisMax != null && vonisMin > vonisMax)) {
+                || (vonisMax != null && vonisMax < 0)
+                || (vonisMin != null && vonisMax != null && vonisMin > vonisMax)) {
                 throw new IllegalArgumentException("Rentang vonis tidak valid.");
             }
         }
 
         public boolean matches(Putusan p) {
-            return (jenis.isBlank()
-                    || p.getJenisNarkotika().equalsIgnoreCase(jenis))
-                    && (beratMin == null
-                    || p.getBeratBarangBuktiGram() >= beratMin)
-                    && (beratMax == null
-                    || p.getBeratBarangBuktiGram() <= beratMax)
-                    && (pasal.isBlank()
-                    || (p.getPasalTerbukti() != null
-                    && p.getPasalTerbukti().toLowerCase(Locale.ROOT)
-                    .contains(pasal.toLowerCase(Locale.ROOT))))
-                    && (vonisMin == null || p.getVonisBulan() >= vonisMin)
-                    && (vonisMax == null || p.getVonisBulan() <= vonisMax);
+            return (jenis.isBlank() || p.getJenisNarkotika().equalsIgnoreCase(jenis))
+                && (beratMin == null || p.getBeratBarangBuktiGram() >= beratMin)
+                && (beratMax == null || p.getBeratBarangBuktiGram() <= beratMax)
+                && (pasal.isBlank() || (p.getPasalTerbukti() != null
+                && p.getPasalTerbukti().toLowerCase(Locale.ROOT).contains(pasal.toLowerCase(Locale.ROOT))))
+                && (vonisMin == null || p.getVonisBulan() >= vonisMin)
+                && (vonisMax == null || p.getVonisBulan() <= vonisMax);
         }
     }
 
@@ -192,11 +171,8 @@ public final class DataManager {
 
     public void replaceAll(DynamicArray<Putusan> staging) {
         try {
-            if (staging == null || staging.size() != 50
-                    || !staging.validateInvariant()) {
-                throw new IllegalArgumentException(
-                    "Impor harus berisi tepat 50 record valid."
-                );
+            if (staging == null || staging.size() != 50 || !staging.validateInvariant()) {
+                throw new IllegalArgumentException("Impor harus berisi tepat 50 record valid.");
             }
             String targetPengadilan = normalisasiPengadilan(staging.get(0).getPengadilan());
             DynamicArray<Putusan> replacement = new DynamicArray<>(50);
@@ -213,15 +189,9 @@ public final class DataManager {
                 replacement.add(putusan);
             }
             data = replacement;
-            tambahLog(
-                "Impor berhasil: 50 putusan dari " + staging.get(0).getPengadilan() + ".",
-                true
-            );
+            tambahLog("Impor berhasil: 50 putusan dari " + staging.get(0).getPengadilan() + ".", true);
         } catch (RuntimeException exception) {
-            tambahLog(
-                "Impor ditolak; data lama tetap dipertahankan: " + exception.getMessage(),
-                false
-            );
+            tambahLog("Impor ditolak; data lama tetap dipertahankan: " + exception.getMessage(), false);
             throw exception;
         }
     }
@@ -253,22 +223,16 @@ public final class DataManager {
         StringBuilder result = new StringBuilder("[");
         for (int i = 0; i < data.size(); i++) {
             if (i > 0) result.append(", ");
-            result.append(data.get(i).getCaseId())
-                    .append(':').append(data.get(i).getVonisBulan());
+            result.append(data.get(i).getCaseId()).append(':').append(data.get(i).getVonisBulan());
         }
         return result.append(']').toString();
     }
 
-    public DynamicArray<String> getSortTrace() {
-        return trace.copy();
-    }
+    public DynamicArray<String> getSortTrace() { return trace.copy(); }
 
-    public record Ringkasan(
-            int jumlah, double rataVonis, BigInteger totalDenda) {}
+    public record Ringkasan(int jumlah, double rataVonis, BigInteger totalDenda) {}
 
-    public Ringkasan hitungRingkasan() {
-        return summarize(data);
-    }
+    public Ringkasan hitungRingkasan() { return summarize(data); }
 
     public static Ringkasan summarize(DynamicArray<Putusan> records) {
         long totalVonis = 0;
@@ -278,9 +242,11 @@ public final class DataManager {
             totalVonis += p.getVonisBulan();
             totalDenda = totalDenda.add(BigInteger.valueOf(p.getDendaRupiah()));
         }
-        return new Ringkasan(records.size(),
-                records.isEmpty() ? 0 : (double) totalVonis / records.size(),
-                totalDenda);
+        return new Ringkasan(
+            records.size(),
+            records.isEmpty() ? 0 : (double) totalVonis / records.size(),
+            totalDenda
+        );
     }
 
     public record DistribusiJenis(String jenis, int jumlah) {}
@@ -300,8 +266,7 @@ public final class DataManager {
                 result.add(new DistribusiJenis(jenis, 1));
             } else {
                 DistribusiJenis previous = result.get(index);
-                result.set(index, new DistribusiJenis(
-                        previous.jenis(), previous.jumlah() + 1));
+                result.set(index, new DistribusiJenis(previous.jenis(), previous.jumlah() + 1));
             }
         }
         return result;
