@@ -23,9 +23,22 @@ public final class DynamicArray<T> implements StrukturData<T> {
 
     private void checkElement(int index) {
         if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException(
-                    "Indeks " + index + ", size " + size);
+            throw new IndexOutOfBoundsException("Indeks " + index + ", size " + size);
         }
+    }
+
+    public void resize(int newCapacity) {
+        if (newCapacity < 1 || newCapacity < size) {
+            throw new IllegalArgumentException("Kapasitas baru tidak boleh lebih kecil dari size atau minimal 1.");
+        }
+        if (newCapacity == data.length) {
+            return;
+        }
+        Object[] replacement = new Object[newCapacity];
+        for (int i = 0; i < size; i++) {
+            replacement[i] = data[i];
+        }
+        data = replacement;
     }
 
     private void grow() {
@@ -34,11 +47,7 @@ public final class DynamicArray<T> implements StrukturData<T> {
         if (capacity > Integer.MAX_VALUE - 8L) {
             throw new IllegalStateException("Kapasitas terlalu besar.");
         }
-        Object[] replacement = new Object[(int) capacity];
-        for (int i = 0; i < size; i++) {
-            replacement[i] = data[i];
-        }
-        data = replacement;
+        resize((int) capacity);
     }
 
     @Override
