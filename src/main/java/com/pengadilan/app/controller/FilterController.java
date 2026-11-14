@@ -1,93 +1,108 @@
 package com.pengadilan.app.controller;
 
 import com.pengadilan.app.model.Putusan;
+import com.pengadilan.app.service.CsvService;
 import com.pengadilan.app.service.DataManager;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import com.pengadilan.app.util.DynamicArray;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import java.io.File;
+import java.util.Locale;
 
 public class FilterController {
+    @FXML private TableView<Putusan> tableFilter;
     @FXML private ComboBox<String> cbJenisNarkotika;
-    @FXML private ComboBox<String> cbTahun;
+    @FXML private TextField txtBeratMin;
+    @FXML private TextField txtBeratMax;
+    @FXML private TextField txtPasal;
     @FXML private TextField txtVonisMin;
     @FXML private TextField txtVonisMax;
-    @FXML private Label lblCount;
-    @FXML private Label lblAvgVonis;
-    @FXML private Label lblTotalDenda;
-    @FXML private TableView<Putusan> tableFilter;
-    @FXML private TableColumn<Putusan, String> colCaseId;
-    @FXML private TableColumn<Putusan, String> colNomorPerkara;
-    @FXML private TableColumn<Putusan, String> colJenis;
-    @FXML private TableColumn<Putusan, Integer> colVonis;
+    @FXML private Label lblHasil;
 
-    private ObservableList<Putusan> masterData;
+    private final DataManager manager = DataManager.getInstance();
+    private DynamicArray<Putusan> result = new DynamicArray<>();
 
     @FXML
     public void initialize() {
-        colCaseId.setCellValueFactory(new PropertyValueFactory<>("caseId"));
-        colNomorPerkara.setCellValueFactory(new PropertyValueFactory<>("nomorPerkara"));
-        colJenis.setCellValueFactory(new PropertyValueFactory<>("jenisNarkotika"));
-        colVonis.setCellValueFactory(new PropertyValueFactory<>("vonisBulan"));
+        MainController.configureTable(tableFilter);
+        cbJenisNarkotika.getItems().add("Semua");
+        DynamicArray<DataManager.DistribusiJenis> types = manager.distribusiJenis();
+        for (int i = 0; i < types.size(); i++) {
+            cbJenisNarkotika.getItems().add(types.get(i).jenis());
+        }
+        handleReset();
+    }
 
-        tableFilter.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+    private Double decimal(TextField field) {
+        if (field.getText().isBlank()) return null;
+        double value = Double.parseDouble(field.getText().trim());
+        if (!Double.isFinite(value) || value < 0) {
+            throw new IllegalArgumentException("Berat harus finite dan tidak negatif.");
+        }
+        return value;
+    }
 
-        masterData = DataManager.getInstance().getListPutusan();
-
-        // Mengisi ComboBox dengan pilihan String jenis narkotika
-        cbJenisNarkotika.setItems(FXCollections.observableArrayList(
-                "Shabu / Metamfetamina", "Ganja / Kanabis", "Ekstasi / MDMA", "Tembakau Sintetis", "Obat Keras / Pil Trex", "Lainnya"
-        ));
-        cbTahun.setItems(FXCollections.observableArrayList("2024", "2023", "2022"));
-
-        tampilkanData(masterData);
+    private Integer integer(TextField field) {
+        if (field.getText().isBlank()) return null;
+        int value = Integer.parseInt(field.getText().trim());
+        if (value < 0) {
+            throw new IllegalArgumentException("Vonis tidak boleh negatif.");
+        }
+        return value;
     }
 
     @FXML
     public void handleFilter() {
-        String selectedJenis = cbJenisNarkotika.getValue();
-        double minVonis = parseDouble(txtVonisMin.getText(), 0);
-        double maxVonis = parseDouble(txtVonisMax.getText(), Double.MAX_VALUE);
-
-        ObservableList<Putusan> filtered = FXCollections.observableArrayList();
-        for (int i = 0; i < masterData.size(); i++) {
-            Putusan p = masterData.get(i);
-            boolean matchJenis = (selectedJenis == null || selectedJenis.isEmpty() || p.getJenisNarkotika().equalsIgnoreCase(selectedJenis));
-            boolean matchVonis = (p.getVonisBulan() >= minVonis && p.getVonisBulan() <= maxVonis);
-
-            if (matchJenis && matchVonis) {
-                filtered.add(p);
-            }
+        DataManager.FilterCriteria criteria;
+        try {
+            String jenis = cbJenisNarkotika.getValue();
+            criteria = new DataManager.FilterCriteria(
+                    jenis == null || jenis.equals("Semua") ? "" : jenis,
+                    decimal(txtBeratMin), decimal(txtBeratMax),
+                    txtPasal.getText(),
+                    integer(txtVonisMin), integer(txtVonisMax));
+        } catch (Exception exception) {
+            manager.tambahLog("Input filter ditolak: " + exception.getMessage(), false);
+            MainController.error(new IllegalArgumentException("Input filter tidak valid: " + exception.getMessage()));
+            return;
         }
+        result = manager.filter(criteria);
+        showResult();
+    }
 
-        tampilkanData(filtered);
-        DataManager.getInstance().tambahLog("Menerapkan filter data putusan lanjutan.");
+    private void showResult() {
+        MainController.showRows(tableFilter, result);
+        DataManager.Ringkasan summary = DataManager.summarize(result);
+        lblHasil.setText(String.format(Locale.ROOT,
+                "Hasil: %d | Rata-rata: %.2f bulan | Total denda: Rp %s",
+                summary.jumlah(), summary.rataVonis(), summary.totalDenda()));
     }
 
     @FXML
     public void handleReset() {
-        cbJenisNarkotika.setValue(null);
-        cbTahun.setValue(null);
+        cbJenisNarkotika.setValue("Semua");
+        txtBeratMin.clear();
+        txtBeratMax.clear();
+        txtPasal.clear();
         txtVonisMin.clear();
         txtVonisMax.clear();
-        tampilkanData(masterData);
+        result = manager.getDataPutusan();
+        showResult();
     }
 
-    private void tampilkanData(ObservableList<Putusan> data) {
-        tableFilter.setItems(data);
-        lblCount.setText(String.valueOf(data.size()));
-        double avgVonis = data.stream().mapToInt(Putusan::getVonisBulan).average().orElse(0.0);
-        lblAvgVonis.setText(String.format("%.1f Bulan", avgVonis));
-        long sumDenda = data.stream().mapToLong(Putusan::getDendaRupiah).sum();
-        lblTotalDenda.setText(String.format("Rp %,d", sumDenda));
-    }
-
-    private double parseDouble(String val, double def) {
+    @FXML
+    public void handleEkspor() {
+        File file = MainController.chooseFile(
+                tableFilter.getScene().getWindow(),
+                true, "Ekspor hasil filter", "csv");
+        if (file == null) return;
         try {
-            return Double.parseDouble(val);
-        } catch (Exception e) {
-            return def;
+            new CsvService().exportCsv(file, result);
+            manager.tambahLog("Ekspor hasil filter: " + result.size() + " record.", true);
+            lblHasil.setText("CSV tersimpan: " + file.getAbsolutePath());
+        } catch (Exception exception) {
+            manager.tambahLog("Ekspor filter gagal: " + exception.getMessage(), false);
+            MainController.error(exception);
         }
     }
 }
