@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefHeight="720.0" prefWidth="804.0" spacing="15.0"
+      style="-fx-padding: 25;" stylesheets="@../css/style.css"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pengadilan.app.controller.RiwayatController">
+    <HBox alignment="CENTER_LEFT">
+        <Label text="Riwayat Aktivitas Pengguna (Audit Trail)" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+        <Pane HBox.hgrow="ALWAYS" />
+        <Label text="Sistem Aktif" style="-fx-text-fill: #16a34a; -fx-font-weight: bold;" />
+    </HBox>
+    <ListView fx:id="listViewAudit" prefHeight="580.0" VBox.vgrow="ALWAYS" />
+</VBox>

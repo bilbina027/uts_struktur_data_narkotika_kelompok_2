@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefHeight="720.0" prefWidth="804.0" spacing="15.0"
+      style="-fx-padding: 25;" stylesheets="@../css/style.css"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pengadilan.app.controller.FilterController">
+    <Label text="Filter dan Statistik Putusan" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+
+    <VBox spacing="10.0" styleClass="stat-card">
+        <Label text="Parameter Filter" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+        <GridPane hgap="15.0" vgap="10.0">
+            <Label text="Jenis Narkotika:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <ComboBox fx:id="cbJenisNarkotika" promptText="Semua jenis" prefWidth="250.0" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+            <Label text="Tahun Putusan:" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+            <ComboBox fx:id="cbTahun" promptText="Semua tahun" prefWidth="250.0" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+
+            <Label text="Vonis Min (Bulan):" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <TextField fx:id="txtVonisMin" promptText="Contoh: 12" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+            <Label text="Vonis Max (Bulan):" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+            <TextField fx:id="txtVonisMax" promptText="Contoh: 120" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+        </GridPane>
+        <HBox spacing="10.0" alignment="CENTER_RIGHT">
+            <Button text="Reset" onAction="#handleReset" style="-fx-background-color: #64748b;"/>
+            <Button text="Terapkan Filter" onAction="#handleFilter"/>
+        </HBox>
+    </VBox>
+
+    <HBox spacing="20.0">
+        <VBox styleClass="stat-card" prefWidth="250.0">
+            <Label text="KASUS DITEMUKAN" styleClass="stat-title"/>
+            <Label fx:id="lblCount" text="0" styleClass="stat-value"/>
+        </VBox>
+        <VBox styleClass="stat-card" prefWidth="250.0">
+            <Label text="RATA-RATA VONIS" styleClass="stat-title"/>
+            <Label fx:id="lblAvgVonis" text="0 Bulan" styleClass="stat-value"/>
+        </VBox>
+        <VBox styleClass="stat-card" prefWidth="250.0">
+            <Label text="TOTAL DENDA" styleClass="stat-title"/>
+            <Label fx:id="lblTotalDenda" text="Rp 0" styleClass="stat-value"/>
+        </VBox>
+    </HBox>
+
+    <TableView fx:id="tableFilter" prefHeight="260.0" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colCaseId" prefWidth="120.0" text="Case ID" />
+            <TableColumn fx:id="colNomorPerkara" prefWidth="260.0" text="Nomor Perkara" />
+            <TableColumn fx:id="colJenis" prefWidth="220.0" text="Jenis Narkotika" />
+            <TableColumn fx:id="colVonis" prefWidth="140.0" text="Vonis (Bulan)" />
+        </columns>
+    </TableView>
+</VBox>
