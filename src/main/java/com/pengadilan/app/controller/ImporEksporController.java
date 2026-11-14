@@ -4,11 +4,9 @@ import com.pengadilan.app.service.CsvService;
 import com.pengadilan.app.service.DataManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import java.io.File;
 
 public class ImporEksporController {
-    @FXML private TextField txtKota;
     @FXML private Label lblStatusImpor;
 
     private final DataManager manager = DataManager.getInstance();
@@ -18,19 +16,12 @@ public class ImporEksporController {
     public void initialize() {
         lblStatusImpor.setText(
                 "Data utama: " + manager.size()
-                        + " record. Impor membutuhkan 50 putusan nyata."
+                        + " record. Impor membutuhkan tepat 50 putusan dari satu Pengadilan Negeri yang sama."
         );
     }
 
     @FXML
     public void handleImporCSV() {
-        String kota = txtKota.getText();
-        if (kota == null || kota.isBlank()) {
-            manager.tambahLog("Impor gagal: kota sumber belum diisi.", false);
-            lblStatusImpor.setText("Masukkan kota sumber terlebih dahulu, misalnya Malang.");
-            return;
-        }
-
         File file = MainController.chooseFile(
                 lblStatusImpor.getScene().getWindow(),
                 false,
@@ -49,9 +40,9 @@ public class ImporEksporController {
                 lblStatusImpor.setText(error + "\nData lama tetap dipertahankan.");
                 return;
             }
-            manager.replaceAll(result.records(), kota);
+            manager.replaceAll(result.records());
             lblStatusImpor.setText(
-                    "Impor berhasil: 50 record dari kota " + kota.trim()
+                    "Impor berhasil: 50 putusan dari " + result.records().get(0).getPengadilan()
                             + ". Pastikan provenance sudah diverifikasi."
             );
         } catch (Exception exception) {
