@@ -26,15 +26,11 @@ class MainAppTest {
 
     private final DataManager manager = DataManager.getInstance();
 
-    /*
-     * Data berikut hanya fixture pengujian.
-     * Bukan dataset putusan nyata untuk pengumpulan tugas.
-     */
     private Putusan fixture(int index) {
         return new Putusan(
                 "TEST-" + index,
                 index + "/Pid.Sus/2024/PN TEST",
-                "PN Uji A", // Seluruh fixture menggunakan satu Pengadilan Negeri yang sama
+                "PN Uji A",
                 LocalDate.of(2024, 1, 1),
                 "T-UJI-" + index,
                 index % 2 == 0 ? "Sabu" : "Ganja",
@@ -61,10 +57,6 @@ class MainAppTest {
 
     @BeforeEach
     void resetData() {
-        /*
-         * DataManager menggunakan singleton.
-         * Dataset utama direset sebelum setiap pengujian.
-         */
         manager.replaceAll(dataset());
     }
 
@@ -268,6 +260,20 @@ class MainAppTest {
     }
 
     @Test
+    void addingDifferentCourtIsRejected() {
+        String[] fields = fixture(100).toFields();
+        fields[2] = "PN Uji B";
+        Putusan differentCourt = Putusan.fromFields(fields);
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> manager.tambahPutusan(differentCourt)
+        );
+        assertEquals(50, manager.size());
+        assertEquals("PN Uji A", manager.getDataPutusan().get(0).getPengadilan());
+        assertTrue(manager.validateInvariant());
+    }
+
+    @Test
     void snapshotDoesNotModifyMainStorage() {
         DynamicArray<Putusan> snapshot = manager.getDataPutusan();
         snapshot.remove(0);
@@ -307,7 +313,7 @@ class MainAppTest {
 
     @Test
     void singleCourtDatasetIsAccepted() {
-        DynamicArray<Putusan> records = dataset(); // Seluruhnya PN Uji A
+        DynamicArray<Putusan> records = dataset();
         manager.replaceAll(records);
         assertEquals(50, manager.size());
         for (int i = 0; i < manager.size(); i++) {
@@ -321,15 +327,15 @@ class MainAppTest {
 
     @Test
     void mixedCourtDatasetIsRejected() {
-        DynamicArray<Putusan> records = dataset(); // Default PN Uji A
+        DynamicArray<Putusan> records = dataset();
         String[] fields = records.get(49).toFields();
-        fields[2] = "PN Uji B"; // Campurkan dengan pengadilan lain
+        fields[2] = "PN Uji B";
         records.set(49, Putusan.fromFields(fields));
         assertThrows(
                 IllegalArgumentException.class,
                 () -> manager.replaceAll(records)
         );
-        // Memastikan data lama tetap utuh dan isi data sebelumnya terjaga (Rekomendasi Revisi 7)[cite: 157]
+
         assertEquals("TEST-0", manager.getDataPutusan().get(0).getCaseId());
         assertEquals("TEST-49", manager.getDataPutusan().get(49).getCaseId());
         assertEquals(50, manager.size());
